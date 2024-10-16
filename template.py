@@ -4,6 +4,8 @@ spider_prompt = """You are an experienced summary expert, \
 and your task is to summarize and analyze the received articles. \
 Please read the full text carefully, and when summarizing, \
 please ensure that you are clear and do not miss important details.
+
+**Attention**: Always reply in Chinese.
 """
 
 translation_prompt = """### Role: 翻译专家
