@@ -28,6 +28,9 @@ if st.session_state.login:
     if "refresh" not in st.session_state:
         st.session_state.refresh = False
 
+    if "continue_" not in st.session_state:
+        st.session_state.continue_ = False
+
     with st.sidebar:
         model: str = st.selectbox("Model", model_list, key="spider_model", disabled=st.session_state.result!=[])
         reset_btn: bool = st.button("Reset", "reset_btn", type="primary", disabled=st.session_state.result==[], use_container_width=True)
@@ -67,6 +70,7 @@ if st.session_state.login:
                     text: str = s.general_spider(query)
                 if len(text) < 8000:
                     st.session_state.result.append({"role": "user", "content": text})
+                    st.session_state.continue_ = True
                     with st.expander("Content Preview"):
                         st.markdown(text)
                 else:
@@ -75,20 +79,25 @@ if st.session_state.login:
                         st.markdown(text)
                     if st.button("Yes", "yes", type="primary"):
                         st.session_state.result.append({"role": "user", "content": text})
+                        st.session_state.continue_ = True
                     elif st.button("No", "no"):
                         st.rerun()
         else:
             st.session_state.result.append({"role": "user", "content": query})
+            st.session_state.continue_ = True
             with st.chat_message("user"):
                 st.markdown(query)
-        messages: list = [{"role": "system", "content": spider_system}] + st.session_state.result
-        with st.chat_message("assistant"):
-            c = Chat(api_key=api_key, base_url=base_url)
-            response = c.default_chat(model, messages, max_tokens, temperature, top_p, frequency_penalty, presence_penalty)
-            result: str = st.write_stream(chunk.choices[0].delta.content for chunk in response if chunk.choices[0].delta.content is not None)
-            st.session_state.result.append({"role": "assistant", "content": result})
-            st.session_state.cache = st.session_state.result
-        st.rerun()
+        
+        if st.session_state.continue_:
+            messages: list = [{"role": "system", "content": spider_system}] + st.session_state.result
+            with st.chat_message("assistant"):
+                c = Chat(api_key=api_key, base_url=base_url)
+                response = c.default_chat(model, messages, max_tokens, temperature, top_p, frequency_penalty, presence_penalty)
+                result: str = st.write_stream(chunk.choices[0].delta.content for chunk in response if chunk.choices[0].delta.content is not None)
+                st.session_state.result.append({"role": "assistant", "content": result})
+                st.session_state.cache = st.session_state.result
+                st.session_state.continue_ = False
+            st.rerun()
     
     if reset_btn:
         st.session_state.result = []
