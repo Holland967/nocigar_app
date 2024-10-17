@@ -71,19 +71,18 @@ if st.session_state.login:
                     text: str = s.cnyt_spider(query)
                 elif link_type == "general":
                     text: str = s.general_spider(query)
+                st.session_state.webpage_content = text
                 if len(text) < 8000:
-                    st.session_state.result.append({"role": "user", "content": text})
-                    st.session_state.webpage_content = text
+                    st.session_state.result.append({"role": "user", "content": st.session_state.webpage_content})
                     st.session_state.continue_ = True
                     with st.expander("Content Preview"):
                         st.markdown(st.session_state.webpage_content)
                 else:
                     st.warning(f"Character Length: {len(text)}. Do you continue?")
-                    st.session_state.webpage_content = text
                     with st.expander("Content Preview"):
                         st.markdown(st.session_state.webpage_content)
                     if st.button("Yes", "yes", type="primary"):
-                        st.session_state.result.append({"role": "user", "content": text})
+                        st.session_state.result.append({"role": "user", "content": st.session_state.webpage_content})
                         st.session_state.continue_ = True
                     elif st.button("No", "no"):
                         st.session_state.webpage_content = ""
