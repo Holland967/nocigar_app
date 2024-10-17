@@ -65,9 +65,9 @@ if st.session_state.login:
                     text: str = s.cnyt_spider(query)
                 elif link_type == "general":
                     text: str = s.general_spider(query)
-                if len(text) < 10000:
+                if len(text) < 8000:
                     st.session_state.result.append({"role": "user", "content": text})
-                    with st.chat_message("user"):
+                    with st.expander("Content Preview"):
                         st.markdown(text)
                 else:
                     st.warning(f"Character Length: {len(text)}. Do you continue?")
